@@ -41,6 +41,10 @@ const PatientDetails = () => {
             {patient.emergencyPhone} {patient.emergencyEmail}
           </li>
           <li>
+            <span className={listingItemLabel}>Insurance Number:</span>{" "}
+            {patient.insuranceNumber}
+          </li>
+          <li>
             <table>
               <thead>
                 <tr>
