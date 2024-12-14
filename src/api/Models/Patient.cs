@@ -29,6 +29,7 @@ namespace Contoso.Healthcare.Api.Models
         public bool PreferEmail { get; set; }
         public bool PreferText { get; set; }
         public bool PreferPhone { get; set; }
+        public string? InsuranceNumber { get; set; }
 
         public static string GetId(string patiendId) => $"{patiendId}:complete";
     }
