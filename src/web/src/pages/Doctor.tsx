@@ -13,7 +13,7 @@ const Doctor = () => {
   }, []);
 
   const action = (patient: Patient) => {
-    return <Link to={`/surgery/patient/${patient.id}`}>View patient</Link>;
+    return <Link to={`/patient/${patient.id}`}>View patient</Link>;
   };
 
   return <PatientList patients={patients || []} action={action} />;
