@@ -8,6 +8,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Contoso.Healthcare.Api.NewPatient;
@@ -41,7 +42,33 @@ public static class UploadFile
 
     private static async Task<Dictionary<string, (string, float?)>> ExtractFormInfo(IFormFile file)
     {
-        // TODO: Call Azure Form Recognizer
-        throw new NotImplementedException("Exercise for the reader");
+        var endpoint = Environment.GetEnvironmentVariable("FORM_RECOGNIZER_ENDPOINT");
+        var apiKey = Environment.GetEnvironmentVariable("FORM_RECOGNIZER_API_KEY");
+        var modelId = Environment.GetEnvironmentVariable("FORM_RECOGNIZER_MODEL_ID");
+
+        var client = new DocumentAnalysisClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
+
+        using var stream = new MemoryStream();
+        await file.CopyToAsync(stream);
+        stream.Position = 0;
+
+        var options = new AnalyzeDocumentOptions { IncludeFieldElements = true };
+        var operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, modelId, stream, options);
+        var result = operation.Value;
+
+        var outputs = new Dictionary<string, (string, float?)>();
+
+        foreach (var field in result.Fields)
+        {
+            var fieldName = field.Key;
+            var fieldValue = field.Value;
+
+            if (fieldValue.ValueType == DocumentFieldType.String)
+            {
+                outputs[fieldName] = (fieldValue.AsString(), fieldValue.Confidence);
+            }
+        }
+
+        return outputs;
     }
 }
